@@ -11,32 +11,57 @@ import (
 )
 
 func ServeHTTP() {
+	di := DI()
+
+	r := gin.Default()
+
+	r.GET("/health", di.HealthCheckAPI.HealthcheckHandlerHTTP)
+
+	userV1 := r.Group("/user/v1")
+	userV1.POST("/register", di.RegisterAPI.Register)
+	userV1.POST("/login", di.LoginAPI.Login)
+
+	err := r.Run(":" + helpers.GetEnv("PORT", ""))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+type DIContainer struct {
+	HealthCheckAPI *api.Healthcheck
+	RegisterAPI    *api.RegisterHandler
+	LoginAPI       *api.LoginHandler
+}
+
+func DI() DIContainer {
 	healthcheckSvc := &services.Healthcheck{}
 	healthcheckAPI := &api.Healthcheck{
 		HealthcheckServices: healthcheckSvc,
 	}
 
-	registerRepo := &repository.RegisterRepository{
+	userRepository := &repository.UserRepository{
 		DB: helpers.DB,
 	}
 
 	registerSvc := &services.RegisterService{
-		RegisterRepo: registerRepo,
+		UserRepository: userRepository,
 	}
 
 	registerAPI := &api.RegisterHandler{
 		RegisterService: registerSvc,
 	}
 
-	r := gin.Default()
+	loginSvc := &services.LoginService{
+		UserRepository: userRepository,
+	}
 
-	r.GET("/health", healthcheckAPI.HealthcheckHandlerHTTP)
+	loginAPI := &api.LoginHandler{
+		LoginService: loginSvc,
+	}
 
-	userV1 := r.Group("/user/v1")
-	userV1.POST("/register", registerAPI.Register)
-
-	err := r.Run(":" + helpers.GetEnv("PORT", ""))
-	if err != nil {
-		log.Fatal(err)
+	return DIContainer{
+		HealthCheckAPI: healthcheckAPI,
+		RegisterAPI:    registerAPI,
+		LoginAPI:       loginAPI,
 	}
 }

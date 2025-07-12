@@ -1,0 +1,12 @@
+package interfaces
+
+import (
+	"context"
+	"seamless-ums/internal/model"
+)
+
+type IUserRepository interface {
+	InsertNewUser(ctx context.Context, user *model.User) error
+	GetUserByUsername(ctx context.Context, username string) (model.User, error)
+	InsertNewUserSession(ctx context.Context, userSession *model.UserSession) error
+}

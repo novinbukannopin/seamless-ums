@@ -5,10 +5,6 @@ import (
 	"seamless-ums/internal/model"
 )
 
-type RegisterRepository interface {
-	InsertNewUser(ctx context.Context, user *model.User) error
-}
-
-type RegisterService interface {
+type IRegisterService interface {
 	Register(ctx context.Context, request model.User) (interface{}, error)
 }
