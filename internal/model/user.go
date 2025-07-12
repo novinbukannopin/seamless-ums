@@ -12,7 +12,7 @@ type User struct {
 	PhoneNumber string    `json:"phone_number" gorm:"column:phone_number;not null; type:varchar(15) ;validate:required"`
 	Address     string    `json:"address" gorm:"column:address;not null; type:varchar(255) ;validate:required"`
 	Dob         string    `json:"dob" gorm:"column:dob;not null; type:date"`
-	Password    string    `json:"password" gorm:"column:password;not null; type:varchar(255)"`
+	Password    string    `json:"password,omitempty" gorm:"column:password;not null; type:varchar(255)"`
 	FullName    string    `json:"full_name" gorm:"column:full_name;not null; type:varchar(100)"`
 	CreatedAt   time.Time `json:"-"`
 	UpdatedAt   time.Time `json:"-"`

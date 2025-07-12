@@ -23,5 +23,9 @@ func SetupMySQL() {
 
 	logrus.Info("Successfully connect to database..")
 
-	DB.AutoMigrate(&model.User{}, &model.UserSession{})
+	err = DB.AutoMigrate(&model.User{}, &model.UserSession{})
+	if err != nil {
+		return
+	}
+	logrus.Info("Database migration completed successfully.")
 }
