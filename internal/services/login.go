@@ -19,6 +19,7 @@ func (s *LoginService) Login(ctx context.Context, req model.LoginRequest) (model
 
 	var (
 		res model.LoginResponse
+		now = time.Now()
 	)
 
 	userDetail, err := s.UserRepository.GetUserByUsername(ctx, req.Username)
@@ -30,12 +31,12 @@ func (s *LoginService) Login(ctx context.Context, req model.LoginRequest) (model
 		return res, errors.Wrap(err, "password mismatch")
 	}
 
-	token, err := helpers.GenerateToken(ctx, userDetail.ID, userDetail.Username, userDetail.FullName, "jwt", userDetail.Email, time.Now())
+	token, err := helpers.GenerateToken(ctx, userDetail.ID, userDetail.Username, userDetail.FullName, "token", userDetail.Email, now)
 	if err != nil {
 		return res, errors.Wrap(err, "failed to generate token")
 	}
 
-	refreshToken, err := helpers.GenerateToken(ctx, userDetail.ID, userDetail.Username, userDetail.FullName, "jwt", userDetail.Email, time.Now())
+	refreshToken, err := helpers.GenerateToken(ctx, userDetail.ID, userDetail.Username, userDetail.FullName, "jwt_token", userDetail.Email, now)
 	if err != nil {
 		return res, errors.Wrap(err, "failed to generate refresh token")
 	}
@@ -44,8 +45,8 @@ func (s *LoginService) Login(ctx context.Context, req model.LoginRequest) (model
 		UserID:              userDetail.ID,
 		Token:               token,
 		RefreshToken:        refreshToken,
-		TokenExpired:        time.Now().Add(24 * time.Hour),
-		RefreshTokenExpired: time.Now().Add(30 * 24 * time.Hour),
+		TokenExpired:        now.Add(helpers.MapTypeToken["token"]),
+		RefreshTokenExpired: now.Add(helpers.MapTypeToken["refresh_token"]),
 	}
 
 	err = s.UserRepository.InsertNewUserSession(ctx, userSession)

@@ -4,6 +4,7 @@ import (
 	"log"
 	"seamless-ums/helpers"
 	"seamless-ums/internal/api"
+	"seamless-ums/internal/interfaces"
 	"seamless-ums/internal/repository"
 	"seamless-ums/internal/services"
 
@@ -20,6 +21,7 @@ func ServeHTTP() {
 	userV1 := r.Group("/user/v1")
 	userV1.POST("/register", di.RegisterAPI.Register)
 	userV1.POST("/login", di.LoginAPI.Login)
+	userV1.DELETE("/logout", di.MiddlewareValidateAuth, di.LogoutAPI.Logout)
 
 	err := r.Run(":" + helpers.GetEnv("PORT", ""))
 	if err != nil {
@@ -28,9 +30,11 @@ func ServeHTTP() {
 }
 
 type DIContainer struct {
-	HealthCheckAPI *api.Healthcheck
-	RegisterAPI    *api.RegisterHandler
-	LoginAPI       *api.LoginHandler
+	UserRepository interfaces.IUserRepository
+	HealthCheckAPI interfaces.IHealthcheckHandler
+	RegisterAPI    interfaces.IRegisterHandler
+	LoginAPI       interfaces.ILoginHandler
+	LogoutAPI      interfaces.ILogoutHandler
 }
 
 func DI() DIContainer {
@@ -59,9 +63,19 @@ func DI() DIContainer {
 		LoginService: loginSvc,
 	}
 
+	logoutSvc := &services.LogoutService{
+		UserRepository: userRepository,
+	}
+
+	logoutAPI := &api.LogoutHandler{
+		LogoutService: logoutSvc,
+	}
+
 	return DIContainer{
+		UserRepository: userRepository,
 		HealthCheckAPI: healthcheckAPI,
 		RegisterAPI:    registerAPI,
 		LoginAPI:       loginAPI,
+		LogoutAPI:      logoutAPI,
 	}
 }

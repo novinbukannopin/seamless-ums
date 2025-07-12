@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"seamless-ums/internal/model"
 )
@@ -34,4 +35,26 @@ func (r *UserRepository) GetUserByUsername(ctx context.Context, username string)
 
 func (r *UserRepository) InsertNewUserSession(ctx context.Context, userSession *model.UserSession) error {
 	return r.DB.Create(userSession).Error
+}
+
+func (r *UserRepository) DeleteUserSession(ctx context.Context, token string) error {
+	return r.DB.Exec("DELETE FROM user_sessions WHERE token = ?", token).Error
+}
+
+func (r *UserRepository) GetUserSessionByToken(ctx context.Context, token string) (model.UserSession, error) {
+	var (
+		userSession model.UserSession
+		err         error
+	)
+
+	err = r.DB.Where("token = ?", token).First(&userSession).Error
+	if err != nil {
+		return userSession, err
+	}
+
+	if userSession.ID == 0 {
+		return userSession, errors.Wrap(err, "user session not found")
+	}
+
+	return userSession, nil
 }
