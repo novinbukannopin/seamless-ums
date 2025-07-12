@@ -1,0 +1,11 @@
+services:
+  database:
+    image: mysql:8.0
+    container_name: seamless_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: ewallet-ums
+      MYSQL_USER: novin
+      MYSQL_PASSWORD: novin_password
+    ports:
+        - "3306:3306"
