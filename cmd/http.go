@@ -39,6 +39,8 @@ type DIContainer struct {
 	LoginAPI        interfaces.ILoginHandler
 	LogoutAPI       interfaces.ILogoutHandler
 	RefreshTokenAPI interfaces.IRefreshTokenHandler
+
+	TokenValidationAPI *api.TokenValidationHandler
 }
 
 func DI() DIContainer {
@@ -83,12 +85,21 @@ func DI() DIContainer {
 		RefreshTokenService: refreshTokenSvc,
 	}
 
+	tokenValidationSvc := &services.TokenValidationService{
+		UserRepository: userRepository,
+	}
+
+	tokenValidationAPI := &api.TokenValidationHandler{
+		TokenValidationService: tokenValidationSvc,
+	}
+
 	return DIContainer{
-		UserRepository:  userRepository,
-		HealthCheckAPI:  healthcheckAPI,
-		RegisterAPI:     registerAPI,
-		LoginAPI:        loginAPI,
-		LogoutAPI:       logoutAPI,
-		RefreshTokenAPI: refreshTokenAPI,
+		UserRepository:     userRepository,
+		HealthCheckAPI:     healthcheckAPI,
+		RegisterAPI:        registerAPI,
+		LoginAPI:           loginAPI,
+		LogoutAPI:          logoutAPI,
+		RefreshTokenAPI:    refreshTokenAPI,
+		TokenValidationAPI: tokenValidationAPI,
 	}
 }
