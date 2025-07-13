@@ -21,7 +21,10 @@ func ServeHTTP() {
 	userV1 := r.Group("/user/v1")
 	userV1.POST("/register", di.RegisterAPI.Register)
 	userV1.POST("/login", di.LoginAPI.Login)
-	userV1.DELETE("/logout", di.MiddlewareValidateAuth, di.LogoutAPI.Logout)
+
+	userV1WithAuth := userV1.Use()
+	userV1WithAuth.DELETE("/logout", di.MiddlewareValidateAuth, di.LogoutAPI.Logout)
+	userV1WithAuth.PUT("/refresh-token", di.MiddlewareRefreshToken, di.RefreshTokenAPI.RefreshToken)
 
 	err := r.Run(":" + helpers.GetEnv("PORT", ""))
 	if err != nil {
@@ -30,11 +33,12 @@ func ServeHTTP() {
 }
 
 type DIContainer struct {
-	UserRepository interfaces.IUserRepository
-	HealthCheckAPI interfaces.IHealthcheckHandler
-	RegisterAPI    interfaces.IRegisterHandler
-	LoginAPI       interfaces.ILoginHandler
-	LogoutAPI      interfaces.ILogoutHandler
+	UserRepository  interfaces.IUserRepository
+	HealthCheckAPI  interfaces.IHealthcheckHandler
+	RegisterAPI     interfaces.IRegisterHandler
+	LoginAPI        interfaces.ILoginHandler
+	LogoutAPI       interfaces.ILogoutHandler
+	RefreshTokenAPI interfaces.IRefreshTokenHandler
 }
 
 func DI() DIContainer {
@@ -71,11 +75,20 @@ func DI() DIContainer {
 		LogoutService: logoutSvc,
 	}
 
-	return DIContainer{
+	refreshTokenSvc := &services.RefreshTokenService{
 		UserRepository: userRepository,
-		HealthCheckAPI: healthcheckAPI,
-		RegisterAPI:    registerAPI,
-		LoginAPI:       loginAPI,
-		LogoutAPI:      logoutAPI,
+	}
+
+	refreshTokenAPI := &api.RefreshTokenHandler{
+		RefreshTokenService: refreshTokenSvc,
+	}
+
+	return DIContainer{
+		UserRepository:  userRepository,
+		HealthCheckAPI:  healthcheckAPI,
+		RegisterAPI:     registerAPI,
+		LoginAPI:        loginAPI,
+		LogoutAPI:       logoutAPI,
+		RefreshTokenAPI: refreshTokenAPI,
 	}
 }

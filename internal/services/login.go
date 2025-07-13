@@ -36,7 +36,7 @@ func (s *LoginService) Login(ctx context.Context, req model.LoginRequest) (model
 		return res, errors.Wrap(err, "failed to generate token")
 	}
 
-	refreshToken, err := helpers.GenerateToken(ctx, userDetail.ID, userDetail.Username, userDetail.FullName, "jwt_token", userDetail.Email, now)
+	refreshToken, err := helpers.GenerateToken(ctx, userDetail.ID, userDetail.Username, userDetail.FullName, "refresh_token", userDetail.Email, now)
 	if err != nil {
 		return res, errors.Wrap(err, "failed to generate refresh token")
 	}
