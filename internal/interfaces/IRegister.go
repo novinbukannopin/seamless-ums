@@ -2,13 +2,14 @@ package interfaces
 
 import (
 	"context"
+	"github.com/gin-gonic/gin"
 	"seamless-ums/internal/model"
 )
 
-type RegisterRepository interface {
-	InsertNewUser(ctx context.Context, user *model.User) error
+type IRegisterService interface {
+	Register(ctx context.Context, request model.User) (interface{}, error)
 }
 
-type RegisterService interface {
-	Register(ctx context.Context, request model.User) (interface{}, error)
+type IRegisterHandler interface {
+	Register(c *gin.Context)
 }

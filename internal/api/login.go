@@ -9,15 +9,16 @@ import (
 	"seamless-ums/internal/model"
 )
 
-type RegisterHandler struct {
-	RegisterService interfaces.IRegisterService
+type LoginHandler struct {
+	LoginService interfaces.ILoginService
 }
 
-func (api *RegisterHandler) Register(c *gin.Context) {
+func (api *LoginHandler) Login(c *gin.Context) {
 	var (
 		log = helpers.Logger
+		req model.LoginRequest
+		res model.LoginResponse
 	)
-	req := model.User{}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Info("Failed to parse JSON request body: ", err)
@@ -34,15 +35,14 @@ func (api *RegisterHandler) Register(c *gin.Context) {
 		return
 	}
 
-	resp, err := api.RegisterService.Register(c.Request.Context(), req)
+	res, err := api.LoginService.Login(c.Request.Context(), req)
 	if err != nil {
-		log.Error("Failed to register user: ", err)
+		log.Error("Failed to login user: ", err)
 		helpers.SendResponseHTTP(
 			c,
 			http.StatusInternalServerError, constant.ErrFailedInternalServer, nil)
 		return
 	}
 
-	helpers.SendResponseHTTP(
-		c, http.StatusOK, constant.SuccessMessage, resp)
+	helpers.SendResponseHTTP(c, http.StatusOK, constant.SuccessMessage, res)
 }
